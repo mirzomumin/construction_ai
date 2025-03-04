@@ -16,7 +16,7 @@ git clone https://github.com/mirzomumin/construction_ai.git
 cd construction_ai
 ```
 
-3. Create a virtual environment
+3. Create a virtual environment depends on your OS
 
 `Linux/MacOS:`
 ```shell
