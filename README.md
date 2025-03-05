@@ -117,7 +117,6 @@ curl -X 'GET' \
 
 Response
 ```shell
-```shell
 HTTP/1.1 200 OK
 Date: Thu, 5 Mar 2025 12:36:30 GMT
 Status: 200 OK
@@ -152,5 +151,4 @@ Content-Type: application/json
     }
   ]
 }
-```
 ```
