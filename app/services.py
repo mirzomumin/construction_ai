@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_session
-from app.models import Project, Task
+from app.models import Project
 from app.repositories import ProjectRepository, TaskRepository
 from app.schemas import CreateProjectSchema
 
