@@ -41,14 +41,10 @@ class ProjectService:
             response_schema=response_schema,
         )
 
-        print(f'TASKS DATA 1: {tasks_data}')
-
         project = await ProjectRepository.create(
             values=project_values, session=session)
         for task_data in tasks_data:
             task_data["project_id"] = project.id
-
-        print(f'TASKS DATA 2: {tasks_data}')
 
         await TaskRepository.bulk_create(values=tasks_data, session=session)
 
@@ -56,6 +52,14 @@ class ProjectService:
         await session.refresh(project)
         return project
 
+    @classmethod
+    async def retrieve(
+        cls,
+        *,
+        project_id: int,
+        session: AsyncSession = Depends(get_session),
+    ) -> Project:
+        return await ProjectRepository.retrieve(project_id=project_id, session=session)
 
 class GeminiService:
     

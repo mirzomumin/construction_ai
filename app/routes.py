@@ -13,3 +13,10 @@ async def create_project(
     project: Project = Depends(ProjectService.create)
 ) -> RetrieveProjectSchema:
     return project
+
+
+@router.get('/{project_id}')
+async def retrieve_project(
+    project: Project = Depends(ProjectService.retrieve)
+) -> RetrieveProjectSchema:
+    return project
