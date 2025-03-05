@@ -1,6 +1,7 @@
 import json
 import httpx
-from fastapi import Depends
+import logging
+from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -41,14 +42,18 @@ class ProjectService:
             response_schema=response_schema,
         )
 
-        project = await ProjectRepository.create(
-            values=project_values, session=session)
-        for task_data in tasks_data:
-            task_data["project_id"] = project.id
+        try:
+            project = await ProjectRepository.create(
+                values=project_values, session=session)
+            for task_data in tasks_data:
+                task_data["project_id"] = project.id
 
-        await TaskRepository.bulk_create(values=tasks_data, session=session)
-
-        await session.commit()
+            await TaskRepository.bulk_create(values=tasks_data, session=session)
+            await session.commit()
+        except Exception as e:
+            logging.exception(f"Create project exception: {e}")
+            await session.rollback()
+            raise HTTPException(status_code=503, detail="Service Unavailable")
         await session.refresh(project)
         return project
 
@@ -59,7 +64,13 @@ class ProjectService:
         project_id: int,
         session: AsyncSession = Depends(get_session),
     ) -> Project:
-        return await ProjectRepository.retrieve(project_id=project_id, session=session)
+        project = await ProjectRepository.retrieve(
+            project_id=project_id, session=session)
+        if project is None:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        return project
+
 
 class GeminiService:
     
