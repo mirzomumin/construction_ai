@@ -21,7 +21,7 @@ class ProjectRepository:
             Project.id == project_id
         ).options(selectinload(Project.tasks))
         result = await session.execute(stmt)
-        return result.scalar_one()
+        return result.scalar_one_or_none()
 
 
 class TaskRepository:
