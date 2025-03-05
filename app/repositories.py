@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert
-from sqlalchemy.orm import joinedload
+from sqlalchemy import insert, select
+from sqlalchemy.orm import selectinload
 
 from app.models import Project, Task
 
@@ -11,7 +11,15 @@ class ProjectRepository:
     async def create(cls, *, values: dict, session: AsyncSession) -> Project:
         stmt = insert(Project).values(
             **values
-        ).returning(Project).options(joinedload(Project.tasks))
+        ).returning(Project).options(selectinload(Project.tasks))
+        result = await session.execute(stmt)
+        return result.scalar_one()
+    
+    @classmethod
+    async def retrieve(cls, *, project_id: int, session: AsyncSession) -> Project:
+        stmt = select(Project).where(
+            Project.id == project_id
+        ).options(selectinload(Project.tasks))
         result = await session.execute(stmt)
         return result.scalar_one()
 
