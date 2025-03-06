@@ -9,7 +9,14 @@ from typing import AsyncGenerator
 
 
 DATABASE_URL = "sqlite+aiosqlite:///./db.sqlite3"
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(
+    DATABASE_URL,
+    pool_timeout=30,
+    pool_recycle=1800,
+    pool_size=10,
+    max_overflow=5,
+    echo=True,
+)
 
 AsyncSessionLocal = async_sessionmaker(
     engine,
