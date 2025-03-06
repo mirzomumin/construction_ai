@@ -1,6 +1,6 @@
 from enum import Enum
 from datetime import datetime, timezone
-from sqlalchemy import String, ForeignKey, BigInteger, DateTime, Enum as SAEnum
+from sqlalchemy import String, ForeignKey, Integer, DateTime, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -21,8 +21,7 @@ class TaskStatus(str, Enum):
 class Project(Base):
     __tablename__ = 'projects'
 
-    id: Mapped[int] = mapped_column(
-        BigInteger, primary_key=True, autoincrement=True, unique=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(255))
     location: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(
@@ -46,8 +45,7 @@ class Project(Base):
 class Task(Base):
     __tablename__ = 'tasks'
 
-    id: Mapped[int] = mapped_column(
-        BigInteger, primary_key=True, autoincrement=True, unique=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(255))
     status: Mapped[str] = mapped_column(
         SAEnum(
