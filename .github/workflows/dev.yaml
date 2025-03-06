@@ -1,0 +1,89 @@
+name: Development
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+
+env:
+  GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up python3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies with pip
+        run: pip install -r requirements.txt
+
+      - name: Run code tests
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}
+        run: pytest -s
+
+      - name: Install ruff linter
+        run: pip install ruff
+
+      - name: Run linters
+        run: ruff check .
+
+
+  automerge:
+    needs: testing
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - name: Get Pull Request Number
+        run: echo "PR_NUMBER=$(gh pr view dev --json number -q .number || echo "")" >> $GITHUB_ENV
+
+      - name: automerge
+        uses: "pascalgn/automerge-action@v0.16.2"
+        env:
+          MERGE_LABELS: ""
+          PULL_REQUEST: "${{ env.PR_NUMBER }}"
+
+
+  main_pr:
+    needs: [testing, automerge]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Retrieve PR url
+        run: |
+          echo "PR_URL=$(gh pr view dev --json url | grep -Po '(?<=\"url\":\")[^\"]*')" >> $GITHUB_ENV
+
+      - name: Create PR if it does not exist
+        run: |
+          # Get PRs count
+          prs=$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --head 'dev' \
+            --base 'main' \
+            --json title \
+            --jq 'length')
+
+          if ((prs == 0)); then
+            gh pr create -B main -H dev \
+            --title 'Merge dev into main' \
+            --body "${{ env.PR_URL }}"
+          fi
