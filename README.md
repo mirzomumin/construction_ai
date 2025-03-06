@@ -46,7 +46,13 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-6. Launch the app
+6. Migrate database
+
+```shell
+alembic upgrade head
+```
+
+7. Launch the app
 
 ```shell
 fastapi dev app/main.py
