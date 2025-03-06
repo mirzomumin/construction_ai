@@ -118,5 +118,4 @@ class GeminiService:
             response.raise_for_status()
             data = response.json()
 
-        print(f'GEMINI RESPONSE DATA: {data}')
         return json.loads(data['candidates'][0]['content']['parts'][0]['text'])
