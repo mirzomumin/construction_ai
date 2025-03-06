@@ -2,52 +2,52 @@ import pytest
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_create_project_success(client):
+    data = {
+        "project_name": "Restaurant",
+        "location": "San Francisco"
+    }
     response = await client.post(
         "/projects/",
-        json={
-            "project_name": "Restaurant",
-            "location": "San Francisco"
-        },
+        json=data,
     )
 
     response_data = response.json()
 
     ######### assert response ##########
     assert response.status_code == 200
+    assert response_data['project_name'] == data['project_name']
+    assert response_data['location'] == data['location']
+    assert response_data['status'] == 'processing'
+    assert isinstance(response_data['tasks'], list)
+    assert 'id' in response_data
+
+    if response_data['tasks']:
+        task0 = response_data['tasks'][0]
+        assert 'name' in task0
+        assert 'status' in task0
     ####################################
 
 
-# @pytest.mark.asyncio(loop_scope="session")
-# async def test_me_fail_invalid_token(client):
-#     # send request to update tokens
-#     response = await client.get(
-#         "/api/v1/user/me",
-#         headers={"Authorization": "Bearer invalid-access-token"},
-#     )
+@pytest.mark.asyncio(loop_scope="session")
+async def test_create_project_fail(client):
 
-#     response_data = response.json()
+    response = await client.post(
+        "/projects/",
+        json={},
+    )
 
-#     ######### assert response ##########
-#     assert response.status_code == 401
-#     assert response_data["detail"] == "Token Invalid"
-#     ####################################
+    response_data = response.json()
+    error_details = response_data['detail']
+    ######### assert response ##########
+    assert response.status_code == 422
+    error_detail0 = error_details[0]
+    error_detail1 = error_details[1]
 
+    assert error_detail0['type'] == 'missing'
+    assert error_detail0['loc'] == ['body', 'project_name']
+    assert error_detail0['msg'] == 'Field required'
 
-# @pytest.mark.asyncio(loop_scope="session")
-# async def test_me_fail_expired_token(client):
-#     user = await create_user()
-#     payload = {"sub": user.username, "user_id": str(user.id)}
-#     access_token = JWTToken.encode_jwt(payload=payload, ttl=-1)
-
-#     # send request to update tokens
-#     response = await client.get(
-#         "/api/v1/user/me",
-#         headers={"Authorization": f"Bearer {access_token}"},
-#     )
-
-#     response_data = response.json()
-
-#     ######### assert response ##########
-#     assert response.status_code == 401
-#     assert response_data["detail"] == "Token Expired"
-#     ####################################
+    assert error_detail1['type'] == 'missing'
+    assert error_detail1['loc'] == ['body', 'location']
+    assert error_detail1['msg'] == 'Field required'
+    ####################################
