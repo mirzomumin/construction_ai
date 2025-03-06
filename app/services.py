@@ -1,7 +1,7 @@
 import json
 import httpx
 import logging
-from fastapi import Depends, HTTPException
+from fastapi import BackgroundTasks, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -9,6 +9,7 @@ from app.database import get_session
 from app.models import Project
 from app.repositories import ProjectRepository, TaskRepository
 from app.schemas import CreateProjectSchema
+from app.tasks import complete_project_tasks
 
 
 class ProjectService:
@@ -18,6 +19,7 @@ class ProjectService:
         cls,
         *,
         payload: CreateProjectSchema,
+        tasks: BackgroundTasks,
         session: AsyncSession = Depends(get_session),
     ) -> Project:
         project_values = payload.model_dump(by_alias=True)
@@ -55,6 +57,8 @@ class ProjectService:
             await session.rollback()
             raise HTTPException(status_code=503, detail="Service Unavailable")
         await session.refresh(project)
+
+        tasks.add_task(complete_project_tasks, project.id, session)
         return project
 
     @classmethod
