@@ -2,12 +2,8 @@ import pytest
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_retrieve_project_success(client, project_obj):
-    data = {
-        "project_name": "Restaurant",
-        "location": "San Francisco"
-    }
-    response = await client.get(f"/projects/{project_obj.id}")
 
+    response = await client.get(f"/projects/{project_obj.id}")
     response_data = response.json()
 
     ######### assert response ##########
@@ -27,7 +23,7 @@ async def test_retrieve_project_success(client, project_obj):
 
 @pytest.mark.asyncio(loop_scope="session")
 async def test_retrieve_project_fail(client):
-    response = await client.get(f"/projects/2")
+    response = await client.get("/projects/2")
 
     response_data = response.json()
 

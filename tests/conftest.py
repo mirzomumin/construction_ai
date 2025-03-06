@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient, ASGITransport
 from app.database import Base, get_session
 from app.main import app
-from app.models import Project, Task
 from app.repositories import ProjectRepository, TaskRepository
 
 
