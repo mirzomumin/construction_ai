@@ -23,6 +23,8 @@ class ProjectService:
         session: AsyncSession = Depends(get_session),
     ) -> Project:
         project_values = payload.model_dump(by_alias=True)
+        logging.info(f'INPUT DATA: {project_values}')
+
         prompt = f"""
             List a few tasks to build a {payload.project_name} in {payload.location} in JSON format.
             Use this JSON schema:
@@ -59,6 +61,8 @@ class ProjectService:
         await session.refresh(project)
 
         tasks.add_task(complete_project_tasks, project.id, session)
+
+        logging.info(f'OUTPUT DATA: {project}')
         return project
 
     @classmethod
@@ -68,11 +72,17 @@ class ProjectService:
         project_id: int,
         session: AsyncSession = Depends(get_session),
     ) -> Project:
-        project = await ProjectRepository.retrieve(
-            project_id=project_id, session=session)
+        try:
+            project = await ProjectRepository.retrieve(
+                project_id=project_id, session=session)
+        except Exception as e:
+            logging.exception(f'Retrieve project exception: {e}')
+            raise HTTPException(status_code=503, detail="Service Unavailable")
+
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found")
 
+        logging.info(f'OUTPUT DATA: {project}')
         return project
 
 
