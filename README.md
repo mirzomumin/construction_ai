@@ -2,6 +2,35 @@
 
 AI-Powered Construction Task Manager
 
+## Structure
+
+```shell
+construction_ai/
+│── .github/
+│   ├── workflows/
+│   │   ├── dev.yaml    # Workflow pipeline to automate CI
+├── alembic/            # Alembic management and migration files source
+│── app/
+│   ├── main.py         # FastAPI entry point
+│   ├── models.py       # Database models
+│   ├── config.py       # App configs
+│   ├── database.py     # SQLite connection
+│   ├── schemas.py      # Pydantic schemas
+│   ├── services.py     # Gemini API task generation
+│   ├── routes.py       # API endpoints
+│   ├── repositories.py # Database operations
+│   ├── tasks.py        # Background tasks
+│── tests/
+│   ├── conftest.py     # Pytest fixtures
+│   ├── test_*.py       # App tests
+│── .gitignore          # List of git ignore folders/files
+│── .env.example        # Environment variables example
+│── alembic.ini         # Alembic settings
+│── requirements.txt    # Dependencies
+│── README.md           # Documentation
+│── pytest.ini          # Pytest settings
+```
+
 ## Set Up
 
 1. Clone project repository
@@ -46,13 +75,15 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-6. Migrate database
+6. Create and Set up your `.env` file similar to `.env.example` one.
+
+7. Migrate database
 
 ```shell
 alembic upgrade head
 ```
 
-7. Launch the app
+8. Launch the app
 
 ```shell
 fastapi dev app/main.py
